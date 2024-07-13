@@ -59,13 +59,12 @@ huggingface_hub.login(token=HUGGINGFACE_API_KEY)
 
 # Initialize the local Stable Diffusion model
 torch.set_default_device(config["pytorch_device"])
-#scheduler = PNDMScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", skip_prk_steps=True, steps_offset=1)
-#scheduler = DPMSolverMultistepScheduler()
+scheduler = DPMSolverMultistepScheduler()
 #pipeline = StableDiffusionPipeline.from_pretrained(config["img_model"], scheduler=scheduler, torch_dtype=torch.float16, variant="fp16", safety_checker=None)
-#pipeline = StableDiffusionPipeline.from_pretrained(config["img_model"], torch_dtype=torch.float16, variant="fp16", safety_checker=None)
 pipeline = StableDiffusionPipeline.from_single_file(config["img_model"], torch_dtype=torch.float16, variant="fp16", safety_checker=None)
-if config["img_model_lora"] != "": # Load LoRA weights if specified in config
+if config["img_model_lora"] != "":
 	pipeline.load_lora_weights(config["img_model_lora"])
+	
 pipeline.to(config["pytorch_device"])
 
 for f in glob.glob("logs/imgs/*"):
@@ -77,6 +76,3 @@ for i in range(len(events_imgs)):
 	for j in range(len(event_imgs)):
 		event_img = event_imgs[j]
 		event_img.save(f"logs/imgs/Event #{ i + 1 } Image #{ j }.png")
-
-# base: runwayml/stable-diffusion-v1-5
-# lora: ./loras/cartoony.safetensors

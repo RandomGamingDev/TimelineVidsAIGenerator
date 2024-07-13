@@ -19,10 +19,9 @@ class Event:
 
 	def gen_imgs(self, batch_size: int, pipeline: StableDiffusionPipeline):
 		with torch.autocast("cuda"):
+			lora_prompt_header = "<lora:cartoony:1> flat color, "
 			negative_prompt = "bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry,missing fingers,bad hands,missing arms, long neck, Humpbacked, deformed, bad anatomy, disfigured, poorly drawn face, mutation, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, watermark, signature, logo, name"
-			#negative_prompt = "easynegative ,   By bad artist -neg,   symbol,   (text),   logo,   (signature),   badhandsv5-neg"
-			#pipeline([", AGGA_ST010,  1girl,  cute girl, <lora:EMS-50853-EMS:0.800000>"] * batch_size, negative_prompt=[negative_prompt] * batch_size, guidance_scale=7.5, num_inference_steps=50).images[0].save("test.png")
-			return pipeline([self.img_prompt] * batch_size, negative_prompt=[negative_prompt] * batch_size, guidance_scale=7.5, num_inference_steps=50).images
+			return pipeline([lora_prompt_header + self.img_prompt] * batch_size, negative_prompt=[negative_prompt] * batch_size, guidance_scale=7.5, num_inference_steps=50).images
 
 	def __str__(self) -> str:
 		return f"<Event>{ self.name } ({ self.time }) ({ self.img_prompt }): { self.description }</Event>"
