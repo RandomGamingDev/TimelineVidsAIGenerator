@@ -17,11 +17,26 @@ class Event:
 		self.img_prompt = event_str[img_prompt_start:img_prompt_end].strip().replace('[', '<').replace(']', '>')
 		self.description = event_str[description_start:].strip()
 
-	def gen_imgs(self, batch_size: int, pipeline: StableDiffusionPipeline):
+	def gen_imgs(self, guidance_scale: float, num_inference_steps: float, batch_size: int, pipeline: StableDiffusionPipeline):
 		with torch.autocast("cuda"):
 			lora_prompt_header = "<lora:cartoony:1> flat color, "
 			negative_prompt = "bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry,missing fingers,bad hands,missing arms, long neck, Humpbacked, deformed, bad anatomy, disfigured, poorly drawn face, mutation, mutated, extra limb, ugly, poorly drawn hands, missing limb, floating limbs, disconnected limbs, malformed hands, out of focus, long neck, long body, monochrome, watermark, signature, logo, name"
-			return pipeline([lora_prompt_header + self.img_prompt] * batch_size, negative_prompt=[negative_prompt] * batch_size, guidance_scale=7.5, num_inference_steps=50).images
+			return pipeline([lora_prompt_header + self.img_prompt] * batch_size, negative_prompt=[negative_prompt] * batch_size, guidance_scale=guidance_scale, num_inference_steps=num_inference_steps).images
+
+	def hc_gen_imgs(self, guidance_scale: float, num_inference_steps: float, batch_size: int, pipeline: StableDiffusionPipeline):
+		hc_good = False
+		while not hc_good:
+			imgs = self.gen_imgs(guidance_scale=guidance_scale, num_inference_steps=num_inference_steps, batch_size=batch_size, pipeline=pipeline)
+			for img in imgs:
+				img.show()
+				hc_dec = input(f"Is this image satisfactory for the following prompt: { self.img_prompt }? (y/c/n): ").strip()
+				if hc_dec == 'y':
+					hc_good = True
+					break
+				elif hc_dec == 'c':
+					self.img_prompt = input("Enter the replacement image prompt: ")
+					break
+		return [img]
 
 	def __str__(self) -> str:
 		return f"<Event>{ self.name } ({ self.time }) ({ self.img_prompt }): { self.description }</Event>"
@@ -38,8 +53,11 @@ class Timeline:
 
 			self.events.append(Event(lstrip_line))
 
-	def gen_events_imgs(self, batch_size: int, pipeline: StableDiffusionPipeline):
-		return [event.gen_imgs(batch_size=batch_size, pipeline=pipeline) for event in self.events]
+	def gen_events_imgs(self, guidance_scale: float, num_inference_steps: float, batch_size: int, pipeline: StableDiffusionPipeline):
+		return [event.gen_imgs(guidance_scale=guidance_scale, num_inference_steps=num_inference_steps, batch_size=batch_size, pipeline=pipeline) for event in self.events]
+
+	def hc_gen_events_imgs(self, guidance_scale: float, num_inference_steps: float, batch_size: int, pipeline: StableDiffusionPipeline):
+		return [event.hc_gen_imgs(guidance_scale=guidance_scale, num_inference_steps=num_inference_steps, batch_size=batch_size, pipeline=pipeline) for event in self.events]
 
 	def blob(self) -> str:
 		return [f"{ i + 1 }. { str(self.events[i]) }\n" for i in range(len(self.events))]

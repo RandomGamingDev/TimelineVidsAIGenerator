@@ -2,5 +2,7 @@
 	"pytorch_device": "cuda",
 	"gpt_model": "gemini-1.5-flash",
 	"img_model": "./models/anythingV3_fp16.safetensors",
-	"img_model_lora": "./loras/cartoony.safetensors"
+	"img_model_lora": "./loras/cartoony.safetensors",
+	"img_model_guidance": 7,
+	"img_model_num_steps": 15
 }
