@@ -3,6 +3,7 @@ import textwrap
 
 import PIL
 from PIL import Image, ImageDraw, ImageFont
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
 
 from timeline import *
 
@@ -12,6 +13,8 @@ class Color:
 # Settings
 vid_res = (1920, 1080)
 num_vis_tabs = 3
+start_delay = 10
+speed = 100
 
 # Parse the response timeline
 with open("logs/response.log") as f:
@@ -49,6 +52,8 @@ for f in glob.glob("logs/imgs/*"):
 	# Draw the description
 	resize_font(font.size * 0.8)
 	event_description_lines = textwrap.wrap(event.description, width=vid_res[0] / (2 * font.size))
+	if len(event_description_lines) > 7:
+		resize_font(font.size * 7.5 / len(event_description_lines))
 	for i in range(len(event_description_lines)):
 		event_description_line = event_description_lines[i]
 		description_loc = (title_loc[0], time_loc[1] + font.size * (2 + i))
@@ -58,4 +63,15 @@ for f in glob.glob("logs/imgs/*"):
 	img_loc = (event_i * tab_res_w, vid_res[1] - tab_res_w)
 	Image.Image.paste(timeline_img, Image.open(f).resize((tab_res_w, tab_res_w)), img_loc)
 
-timeline_img.save("timeline.png")
+# Save the image
+timeline_img.save("logs/timeline.png")
+
+# Start creating the video
+timeline_clip = \
+	ImageClip("logs/timeline.png") \
+		.set_start(0) \
+		.set_duration((tab_res_w * len(timeline.events) - vid_res[0]) / speed) \
+		.set_position(lambda t: (-speed * max(t - start_delay, 0), "center"))
+          
+final = CompositeVideoClip([timeline_clip], size=vid_res) # Remember to add audio
+final.write_videofile("out/vid.mp4", audio=True, fps=24) # webm videos don't have colors???

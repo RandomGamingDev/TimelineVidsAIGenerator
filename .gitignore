@@ -3,3 +3,5 @@ tokens/*
 logs/*
 models/*
 loras/*
+out/*
+fonts/*
