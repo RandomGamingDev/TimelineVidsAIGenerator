@@ -63,11 +63,13 @@ for f in glob.glob("logs/imgs/*"):
 	Image.Image.paste(timeline_img, Image.open(f).resize((tab_res_w, tab_res_w)), img_loc)
 
 # Save the image
-timeline_img.save("logs/timeline.png")
+#timeline_img.save("logs/timeline.png")
+
+timeline_img = Image.open("logs/timeline.png")
 
 # Start creating the video
-timeline_finish_time = (tab_res_w * len(timeline.events) - vid_res[0]) / speed
-vid_duration = (tab_res_w * len(timeline.events) - vid_res[0] / 2) / speed
+timeline_finish_time = (timeline_img.size[0]) / speed
+vid_duration = (timeline_img.size[0] + vid_res[0] / 2) / speed
 end_fade_duration = vid_duration - timeline_finish_time
 
 # Get the music

@@ -4,5 +4,5 @@
 	"img_model": "./models/anythingV3_fp16.safetensors",
 	"img_model_lora": "./loras/cartoony.safetensors",
 	"img_model_guidance": 7,
-	"img_model_num_steps": 15
+	"img_model_num_steps": 50
 }
