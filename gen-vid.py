@@ -3,7 +3,7 @@ import textwrap
 
 import PIL
 from PIL import Image, ImageDraw, ImageFont
-from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip
+from moviepy.editor import ImageClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip
 
 from timeline import *
 
@@ -28,7 +28,7 @@ timeline_draw = ImageDraw.Draw(timeline_img)
 # Create the font used for rendering
 def resize_font(size):
 	global font
-	font = ImageFont.truetype("fonts/Renogare.otf", size)
+	font = ImageFont.truetype("assets/fonts/Renogare.otf", size)
 font = None
 
 # Paste the images
@@ -66,11 +66,21 @@ for f in glob.glob("logs/imgs/*"):
 timeline_img.save("logs/timeline.png")
 
 # Start creating the video
+vid_duration = (tab_res_w * len(timeline.events) - vid_res[0]) / speed
+
+# Get the music
+background_music = \
+	AudioFileClip("assets/music/In Dreamland.opus") \
+		.set_start(0) \
+		.set_duration(vid_duration)
+
+# Get the timeline's image itself
 timeline_clip = \
 	ImageClip("logs/timeline.png") \
 		.set_start(0) \
-		.set_duration((tab_res_w * len(timeline.events) - vid_res[0]) / speed) \
+		.set_duration(vid_duration) \
 		.set_position(lambda t: (vid_res[0] + -speed * t, "center"))
           
-final = CompositeVideoClip([timeline_clip], size=vid_res) # Remember to add audio
-final.write_videofile("out/vid.mp4", audio=True, fps=24) # webm videos don't have colors???
+video = CompositeVideoClip([timeline_clip], size=vid_res)
+video = video.set_audio(CompositeAudioClip([background_music]))
+video.write_videofile("out/vid.mp4", audio=True, fps=24) # webm videos don't have colors???
