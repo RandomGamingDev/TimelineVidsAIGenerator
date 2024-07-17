@@ -13,7 +13,6 @@ class Color:
 # Settings
 vid_res = (1920, 1080)
 num_vis_tabs = 3
-start_delay = 10
 speed = 100
 
 # Parse the response timeline
@@ -71,7 +70,7 @@ timeline_clip = \
 	ImageClip("logs/timeline.png") \
 		.set_start(0) \
 		.set_duration((tab_res_w * len(timeline.events) - vid_res[0]) / speed) \
-		.set_position(lambda t: (-speed * max(t - start_delay, 0), "center"))
+		.set_position(lambda t: (vid_res[0] + -speed * t, "center"))
           
 final = CompositeVideoClip([timeline_clip], size=vid_res) # Remember to add audio
 final.write_videofile("out/vid.mp4", audio=True, fps=24) # webm videos don't have colors???
