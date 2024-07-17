@@ -66,20 +66,24 @@ for f in glob.glob("logs/imgs/*"):
 timeline_img.save("logs/timeline.png")
 
 # Start creating the video
-vid_duration = (tab_res_w * len(timeline.events) - vid_res[0]) / speed
+timeline_finish_time = (tab_res_w * len(timeline.events) - vid_res[0]) / speed
+vid_duration = (tab_res_w * len(timeline.events) - vid_res[0] / 2) / speed
+end_fade_duration = vid_duration - timeline_finish_time
 
 # Get the music
 background_music = \
 	AudioFileClip("assets/music/In Dreamland.opus") \
 		.set_start(0) \
-		.set_duration(vid_duration)
+		.set_duration(vid_duration) \
+		.audio_fadeout(end_fade_duration)
 
 # Get the timeline's image itself
 timeline_clip = \
 	ImageClip("logs/timeline.png") \
 		.set_start(0) \
 		.set_duration(vid_duration) \
-		.set_position(lambda t: (vid_res[0] + -speed * t, "center"))
+		.set_position(lambda t: (vid_res[0] + -speed * min(t, timeline_finish_time), "center")) \
+		.fadeout(end_fade_duration)
           
 video = CompositeVideoClip([timeline_clip], size=vid_res)
 video = video.set_audio(CompositeAudioClip([background_music]))
